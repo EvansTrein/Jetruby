@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
+import { ConfigService } from './config.service';
 
 @Module({
   imports: [
@@ -8,7 +9,7 @@ import { ConfigModule as NestConfigModule } from '@nestjs/config';
       envFilePath: 'configLocal.env',
     }),
   ],
-  providers: [],
-  exports: [],
+  providers: [ConfigService],
+  exports: [ConfigService],
 })
 export class ConfigModule {}

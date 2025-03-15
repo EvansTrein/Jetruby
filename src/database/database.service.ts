@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy, OnModuleInit, Logger, INestApplication } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
 import { DataSource, MigrationExecutor } from 'typeorm';
 import { ConfigService } from 'src/config/config.service';
 import { IDbConfig } from 'src/config/interfaces';
@@ -15,7 +15,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       type: 'postgres',
       ...this.dbConfig,
       synchronize: false,
-      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+      entities: [__dirname + '/../database/entity/*{.ts,.js}'],
       migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     });
   }
@@ -38,6 +38,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       const pendingMigrations = await this.dataSource.showMigrations();
       this.logger.debug(`Pending migrations: ${pendingMigrations}`);
 
+			// launch migrations at startup
       await this.runMigrations();
     }
   }

@@ -7,5 +7,9 @@ export interface IDbConfig {
 }
 
 export interface IHttpServer {
-	port: number
+  port: number;
+}
+
+export interface IGithubServ {
+  queryInterval: number;
 }

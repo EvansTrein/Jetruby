@@ -3,22 +3,18 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class CreateRepoTable1742050995514 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TABLE "repo" (
-        "id" SERIAL PRIMARY KEY,
-        "gitHub_id" integer NOT NULL,
-				"name" character varying NOT NULL,
-        "html_url" character varying NOT NULL,
-        "description" character varying NOT NULL,
-        "language" character varying,
-        "stargazers_count" integer NOT NULL
-      )
-    `);
-    await queryRunner.query(`
-      CREATE INDEX "IDX_REPO_GITHUB_ID" ON "repo" ("gitHub_id")
-    `);
+		CREATE TABLE "repo" (
+			"id" SERIAL PRIMARY KEY,
+			"gitHub_id" INTEGER NOT NULL UNIQUE,
+			"name" VARCHAR(255) NOT NULL,
+			"html_url" VARCHAR(255) NOT NULL,
+			"description" TEXT,
+			"language" VARCHAR(255),
+			"stargazers_count" INTEGER NOT NULL
+		)`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "repo"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "repo";`);
   }
 }

@@ -1,11 +1,11 @@
-import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, Unique } from 'typeorm';
 
 @Entity()
+@Unique(['gitHub_id'])
 export class Repo {
   @PrimaryColumn()
   public id!: number;
 
-	@Index()
   @Column()
   public gitHub_id!: number;
 
