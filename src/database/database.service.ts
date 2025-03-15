@@ -1,11 +1,11 @@
-import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit, Logger, INestApplication } from '@nestjs/common';
 import { DataSource, MigrationExecutor } from 'typeorm';
 import { ConfigService } from 'src/config/config.service';
 import { IDbConfig } from 'src/config/interfaces';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(DatabaseService.name)
+  private readonly logger = new Logger(DatabaseService.name);
   private dataSource: DataSource;
   private readonly dbConfig: IDbConfig;
 
@@ -16,7 +16,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       ...this.dbConfig,
       synchronize: false,
       entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      migrations: ['./migrations/*{.ts,.js}'],
+      migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     });
   }
 
@@ -29,12 +29,16 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       await this.dataSource
         .initialize()
         .then(() => {
-          console.log('Database connection established');
+          this.logger.log('Database connection established');
         })
         .catch((err) => {
-					this.logger.error('Error Database initialization:', err)
-          // console.error('Error during Data Source initialization:', err);
+          this.logger.error('Error Database initialization:', err);
         });
+
+      const pendingMigrations = await this.dataSource.showMigrations();
+      this.logger.debug(`Pending migrations: ${pendingMigrations}`);
+
+      await this.runMigrations();
     }
   }
 
@@ -43,10 +47,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       await this.dataSource
         .destroy()
         .then(() => {
-          console.log('Database connection closed');
+          this.logger.log('Database connection closed');
         })
         .catch((err) => {
-          console.error('Error when disconnecting from the database:', err);
+          this.logger.error('Error when disconnecting from the database:', err);
         });
     }
   }
@@ -56,10 +60,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     await migrationExecutor
       .executePendingMigrations()
       .then(() => {
-        console.log('Migrations applied');
+        this.logger.log('Migrations applied');
       })
       .catch((err) => {
-        console.error('Failed migrations:', err);
+        this.logger.error('Failed migrations:', err);
       });
   }
 
@@ -68,10 +72,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     await migrationExecutor
       .undoLastMigration()
       .then(() => {
-        console.log('Last migration reverted');
+        this.logger.log('Last migration reverted');
       })
       .catch((err) => {
-        console.error('Failed to roll back migrations:', err);
+        this.logger.error('Failed to roll back migrations:', err);
       });
   }
 }
