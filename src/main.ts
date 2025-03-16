@@ -11,7 +11,7 @@ async function bootstrap() {
 
   // Signal handler SIGINT (Ctrl+C)
   process.on('SIGINT', async () => {
-    console.log('Received SIGINT. Closing database connection...');
+    console.log('Received SIGINT');
     await databaseService.onModuleDestroy(); // Close the connection to the database
     await app.close();
     process.exit(0);

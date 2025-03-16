@@ -5,7 +5,7 @@ import { IDbConfig } from 'src/config/interfaces';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(DatabaseService.name);
+  private readonly logger: Logger = new Logger(DatabaseService.name);
   private dataSource: DataSource;
   private readonly dbConfig: IDbConfig;
 
@@ -38,7 +38,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       const pendingMigrations = await this.dataSource.showMigrations();
       this.logger.debug(`Pending migrations: ${pendingMigrations}`);
 
-			// launch migrations at startup
+      // launch migrations at startup
       await this.runMigrations();
     }
   }
