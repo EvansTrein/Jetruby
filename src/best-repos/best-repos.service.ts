@@ -56,14 +56,15 @@ export class BestReposService {
   private clearTimer(): void {
     if (this.intervalReq) {
       clearInterval(this.intervalReq);
-      this.logger.debug('Timer cleared');
+      this.logger.log('Timer cleared');
     }
   }
 
   public resetTimer(): void {
-    this.logger.log('Resetting timer');
+    this.handleInterval(); // forced request
     this.clearTimer();
     this.startTimer();
+    this.logger.log('Resetting timer');
   }
   // --------------------------------------
 
@@ -95,7 +96,7 @@ export class BestReposService {
       );
 
       const fullUrl = this.httpService.axiosRef.getUri({ url, params });
-      this.logger.debug(`Making request to URL: ${fullUrl}`);
+      this.logger.debug(`Request to URL: ${fullUrl}`);
 
       const reposResponce = response.data.items.map((item) => ({
         gitHub_id: item.id,
