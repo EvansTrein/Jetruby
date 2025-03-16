@@ -23,6 +23,7 @@ import { Repo } from './entity/repo.entity';
     }),
     TypeOrmModule.forFeature([Repo]),
   ],
+  controllers: [],
   providers: [DatabaseService, ConfigService],
   exports: [DatabaseService, TypeOrmModule],
 })

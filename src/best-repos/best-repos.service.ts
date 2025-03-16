@@ -37,16 +37,35 @@ export class BestReposService {
   }
 
   onModuleInit(): void {
-    this.intervalReq = setInterval(() => this.handleInterval(), this.intervalMs);
+    this.startTimer();
     this.logger.debug('Interval started:', this.intervalReq);
   }
 
   onModuleDestroy(): void {
+    this.clearTimer();
+    this.logger.log('Interval cleared');
+  }
+
+  // ----------  timer control   ----------
+  private startTimer(): void {
+    this.clearTimer();
+    this.intervalReq = setInterval(() => this.handleInterval(), this.intervalMs);
+    this.logger.debug('Timer started with interval:', this.intervalMs);
+  }
+
+  private clearTimer(): void {
     if (this.intervalReq) {
       clearInterval(this.intervalReq);
-      this.logger.log('Interval cleared.');
+      this.logger.debug('Timer cleared');
     }
   }
+
+  public resetTimer(): void {
+    this.logger.log('Resetting timer');
+    this.clearTimer();
+    this.startTimer();
+  }
+  // ---------------------------------------
 
   private async initializeActualIdsToDB(): Promise<void> {
     try {

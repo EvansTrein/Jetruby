@@ -9,6 +9,7 @@ import { ConfigService } from './config.service';
       envFilePath: 'configLocal.env',
     }),
   ],
+  controllers: [],
   providers: [ConfigService],
   exports: [ConfigService],
 })

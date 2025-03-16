@@ -3,7 +3,9 @@ import { ApiService } from './api.service';
 import { ApiController } from './api.controller';
 
 @Module({
+  imports: [],
   providers: [ApiService],
-  controllers: [ApiController]
+  controllers: [ApiController],
+  exports: [],
 })
 export class ApiModule {}

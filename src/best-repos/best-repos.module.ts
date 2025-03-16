@@ -4,10 +4,10 @@ import { BestReposService } from './best-repos.service';
 import { DatabaseModule } from 'src/database/database.module';
 import { ConfigService } from 'src/config/config.service';
 
-
 @Module({
-	imports: [DatabaseModule, HttpModule],
+  imports: [DatabaseModule, HttpModule],
+  controllers: [],
   providers: [BestReposService, ConfigService],
-	exports: [BestReposService]
+  exports: [BestReposService],
 })
 export class BestReposModule {}
