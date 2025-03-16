@@ -75,6 +75,7 @@ export class BestReposService {
       this.actualIdsToDB = existingRepos.map((repo) => repo.gitHub_id);
 
       this.logger.debug(`Initialized actualIdsToDB with ${this.actualIdsToDB.length} IDs`);
+      // this.logger.warn('actualIdsToDB', this.actualIdsToDB);
     } catch (error: unknown) {
       this.logger.error('Error initializing actualIdsToDB:', (error as Error).message);
     }
@@ -88,7 +89,7 @@ export class BestReposService {
         sort: 'stars',
         order: 'desc',
         page: 1,
-        per_page: 20,
+        per_page: 100,
       };
 
       const response: AxiosResponse<IGitHubResponse, void> = await firstValueFrom(

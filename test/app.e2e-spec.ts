@@ -24,6 +24,7 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
+	// database cleanup after test completion
   beforeEach(async () => {
     await repoRepository.clear();
   });

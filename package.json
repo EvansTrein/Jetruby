@@ -59,7 +59,7 @@
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
-	"preset": "ts-jest",
+    "preset": "ts-jest",
     "moduleFileExtensions": [
       "js",
       "json",
@@ -75,8 +75,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
-	"moduleNameMapper": {
-		"^src/(.*)$": "<rootDir>/$1"
-	  }
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   }
 }
