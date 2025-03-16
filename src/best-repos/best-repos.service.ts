@@ -8,6 +8,17 @@ import { AxiosResponse } from 'axios';
 import { IGitHubResponse } from './interfaces';
 import { ConfigService } from 'src/config/config.service';
 
+/* 
+BestReposService is designed to periodically query popular GitHub repositories and store them in a database.
+
+- Each time at startup, it retrieves all gitHub_id from the database
+  and saves them to understand which repositories are not in the database yet
+- Queries popular GitHub repositories via API.
+- Filters new repositories that are not yet in the database (by `gitHub_id` field).
+- Saves new repositories in the database.
+
+`queryInterval`: the interval of requests to the GitHub API (in milliseconds) is set in the .ENV file and can be read here 
+*/
 @Injectable()
 export class BestReposService {
   private readonly logger: Logger = new Logger(BestReposService.name);
@@ -22,6 +33,7 @@ export class BestReposService {
     private readonly httpService: HttpService,
   ) {
     this.intervalMs = configService.getGithubServ().queryInterval;
+    this.initializeActualIdsToDB();
   }
 
   onModuleInit(): void {
@@ -33,6 +45,18 @@ export class BestReposService {
     if (this.intervalReq) {
       clearInterval(this.intervalReq);
       this.logger.log('Interval cleared.');
+    }
+  }
+
+  private async initializeActualIdsToDB(): Promise<void> {
+    try {
+      // Get all gitHub_ids from the database
+      const existingRepos = await this.dbRepo.find({ select: ['gitHub_id'] });
+      this.actualIdsToDB = existingRepos.map((repo) => repo.gitHub_id);
+
+      this.logger.debug(`Initialized actualIdsToDB with ${this.actualIdsToDB.length} IDs`);
+    } catch (error: unknown) {
+      this.logger.error('Error initializing actualIdsToDB:', (error as Error).message);
     }
   }
 
@@ -51,12 +75,15 @@ export class BestReposService {
         this.httpService.get<IGitHubResponse>(url, { params }),
       );
 
+      const fullUrl = this.httpService.axiosRef.getUri({ url, params });
+      this.logger.debug(`Making request to URL: ${fullUrl}`);
+
       const reposResponce = response.data.items.map((item) => ({
-        id: item.id,
+        gitHub_id: item.id,
         name: item.name,
         html_url: item.html_url,
-        description: item.description || null,
-        language: item.language || null,
+        description: item.description || undefined,
+        language: item.language || undefined,
         stargazers_count: item.stargazers_count,
       }));
 
@@ -65,17 +92,17 @@ export class BestReposService {
       );
 
       // Filter repositories, leaving only those whose ids are missing in actualIdsToDB
-      const newRepos = reposResponce.filter((repo) => !this.actualIdsToDB.includes(repo.id));
+      const newRepos = reposResponce.filter((repo) => !this.actualIdsToDB.includes(repo.gitHub_id));
       this.logger.debug(`${newRepos.length} repositories left need to be saved as they are not in the database`);
 
       if (newRepos.length > 0) {
-        // TODO: add to DB
+        await this.dbRepo.save(newRepos);
 
         // Add new id to actualIdsToDB
-        newRepos.forEach((repo) => this.actualIdsToDB.push(repo.id));
-        this.logger.log('new repository id successfully saved in the service');
+        newRepos.forEach((repo) => this.actualIdsToDB.push(repo.gitHub_id));
+        this.logger.log('New repository id successfully saved in the service');
 
-        const newRepoIds = newRepos.map((repo) => repo.id);
+        const newRepoIds = newRepos.map((repo) => repo.gitHub_id);
         this.logger.debug(`New repository IDs: ${JSON.stringify(newRepoIds)}`);
       }
     } catch (error: unknown) {
