@@ -46,7 +46,7 @@ export class BestReposService {
     this.logger.log('Interval cleared');
   }
 
-  // ----------  timer control   ----------
+  // ----------  timer control  ----------
   private startTimer(): void {
     this.clearTimer();
     this.intervalReq = setInterval(() => this.handleInterval(), this.intervalMs);
@@ -65,7 +65,7 @@ export class BestReposService {
     this.clearTimer();
     this.startTimer();
   }
-  // ---------------------------------------
+  // --------------------------------------
 
   private async initializeActualIdsToDB(): Promise<void> {
     try {

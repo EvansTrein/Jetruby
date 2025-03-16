@@ -18,6 +18,7 @@ import { Repo } from './entity/repo.entity';
         database: configService.getDbConfig().database,
         entities: [Repo],
         synchronize: false,
+        logging: true,
       }),
       inject: [ConfigService],
     }),
