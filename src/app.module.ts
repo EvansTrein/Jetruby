@@ -5,10 +5,11 @@ import { ApiModule } from './api/api.module';
 import { BestReposModule } from './best-repos/best-repos.module';
 import { ApiController } from './api/api.controller';
 import { ApiService } from './api/api.service';
+import { UiController } from './ui.controller';
 
 @Module({
   imports: [ConfigModule, DatabaseModule, ApiModule, BestReposModule],
-  controllers: [ApiController],
+  controllers: [ApiController, UiController],
   providers: [ApiService],
   exports: [],
 })

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <title>UI</title>
+  </head>
+  <body class="bg-black text-emerald-300">
+    <div id="app">
+      <div class="h-lvh container mx-auto">
+        <header class="border-b-2 border-dotted flex justify-center items-center pt-2 pb-2 gap-5">
+          <p class="cursor-default">JETRUBY</p>
+          <div class="flex gap-5">
+            <input
+              class="outline-none bg-slate-800 rounded-lg text-center hover:border-b-1 duration-100"
+              type="text"
+              placeholder="id or name"
+            />
+            <button
+              class="cursor-pointer rounded-md border-slate-600 border-b-2 pl-2 pr-2 hover:bg-slate-600 duration-350"
+            >
+              get repo
+            </button>
+            <button
+              @click="fetchAllRepos"
+              class="cursor-pointer rounded-md border-slate-600 border-b-2 pl-2 pr-2 hover:bg-slate-600 duration-350"
+            >
+              get all repos
+            </button>
+            <button
+              class="cursor-pointer rounded-md border-slate-600 border-b-2 pl-2 pr-2 hover:bg-slate-600 duration-350"
+            >
+              update
+            </button>
+          </div>
+        </header>
+        <main class="mt-5 flex flex-col justify-center">
+          <div v-if="repos.length === 0" class="text-center text-gray-500 text-2xl">
+            No repositories found. Click "get all repos" to load data.
+          </div>
+
+          <div
+            v-for="(repo, index) in repos"
+            :key="index"
+            class="w-2/3 mx-auto bg-slate-800 p-3 mb-2 rounded-md text-emerald-100 flex flex-col justify-center"
+          >
+            <span class="text-center"
+              ><p class="text-black font-bold w-fit inline">ID:</p>
+              {{ repo.id }}</span
+            >
+            <span class="text-center"
+              ><p class="text-black font-bold w-fit inline">GitHub ID:</p>
+              {{ repo.gitHub_id }}</span
+            >
+            <span class="text-center"
+              ><p class="text-black font-bold w-fit inline">Name:</p>
+              {{ repo.name }}</span
+            >
+            <span class="text-center"
+              ><p class="text-black font-bold w-fit inline">Language:</p>
+              {{ repo.language }}</span
+            >
+            <span class="text-center"
+              ><p class="text-black font-bold w-fit inline">Star:</p>
+              {{ repo.stargazers_count }}</span
+            >
+            <span class="text-center"
+              ><p class="text-black font-bold w-fit inline">Description:</p>
+              {{ repo.description }}</span
+            >
+            <!-- <a class="text-center hover:scale-90" href={{ repo.html_url }}>{{ repo.html_url }}</a> -->
+          </div>
+        </main>
+      </div>
+    </div>
+    <script>
+      const { createApp, reactive } = Vue;
+
+      createApp({
+        setup() {
+          const repos = reactive([]);
+
+          const fetchAllRepos = async () => {
+            try {
+              const response = await fetch('http://localhost:8080/api/repo');
+              if (!response.ok) {
+                alert('Failed to fetch repositories');
+              }
+              const data = await response.json();
+              console.log(data);
+              repos.splice(0, repos.length, ...data);
+            } catch (error) {
+              alert('Error fetching repositories:', error);
+            }
+          };
+          return {
+            repos,
+            fetchAllRepos,
+          };
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>
