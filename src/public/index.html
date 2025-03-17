@@ -10,15 +10,18 @@
   <body class="bg-black text-emerald-300">
     <div id="app">
       <div class="h-lvh container mx-auto">
+				<!-- Header -->
         <header class="border-b-2 border-dotted flex justify-center items-center pt-2 pb-2 gap-5">
           <p class="cursor-default">JETRUBY</p>
           <div class="flex gap-5">
             <input
               class="outline-none bg-slate-800 rounded-lg text-center hover:border-b-1 duration-100"
+              v-model="searchInput"
               type="text"
               placeholder="id or name"
             />
             <button
+              @click="fetchRepo"
               class="cursor-pointer rounded-md border-slate-600 border-b-2 pl-2 pr-2 hover:bg-slate-600 duration-350"
             >
               get repo
@@ -30,74 +33,135 @@
               get all repos
             </button>
             <button
+              @click="resetRepos"
               class="cursor-pointer rounded-md border-slate-600 border-b-2 pl-2 pr-2 hover:bg-slate-600 duration-350"
             >
               update
             </button>
           </div>
         </header>
+				<!-- Header -->
+
+				<!-- Content -->
         <main class="mt-5 flex flex-col justify-center">
-          <div v-if="repos.length === 0" class="text-center text-gray-500 text-2xl">
-            No repositories found. Click "get all repos" to load data.
-          </div>
+          <div v-if="repos.length === 0" class="text-center text-gray-500 text-2xl">{{ message }}</div>
 
           <div
             v-for="(repo, index) in repos"
             :key="index"
-            class="w-2/3 mx-auto bg-slate-800 p-3 mb-2 rounded-md text-emerald-100 flex flex-col justify-center"
+            class="w-2/3 mx-auto bg-slate-800 p-3 mb-2 rounded-md text-emerald-100 flex flex-col justify-center gap-2"
           >
-            <span class="text-center"
-              ><p class="text-black font-bold w-fit inline">ID:</p>
-              {{ repo.id }}</span
-            >
-            <span class="text-center"
-              ><p class="text-black font-bold w-fit inline">GitHub ID:</p>
-              {{ repo.gitHub_id }}</span
-            >
-            <span class="text-center"
-              ><p class="text-black font-bold w-fit inline">Name:</p>
-              {{ repo.name }}</span
-            >
-            <span class="text-center"
-              ><p class="text-black font-bold w-fit inline">Language:</p>
-              {{ repo.language }}</span
-            >
-            <span class="text-center"
-              ><p class="text-black font-bold w-fit inline">Star:</p>
-              {{ repo.stargazers_count }}</span
-            >
-            <span class="text-center"
-              ><p class="text-black font-bold w-fit inline">Description:</p>
-              {{ repo.description }}</span
-            >
-            <!-- <a class="text-center hover:scale-90" href={{ repo.html_url }}>{{ repo.html_url }}</a> -->
+            <div class="flex gap-2 justify-center w-fit mx-auto rounded-md bg-white/20 pl-3 pr-3">
+              <p class="text-black font-bold w-fit inline">ID:</p>
+              <span>{{ repo.id }}</span>
+              <p class="text-black font-bold w-fit inline">GitHub ID:</p>
+              <span>{{ repo.gitHub_id }}</span>
+              <p class="text-black font-bold w-fit inline">Name:</p>
+              <span>{{ repo.name }}</span>
+            </div>
+            <div class="flex gap-2 justify-center">
+              <p class="text-black font-bold w-fit inline">Language:</p>
+              <span>{{ repo.language }}</span>
+              <p class="text-black font-bold w-fit inline">Star:</p>
+              <span>{{ repo.stargazers_count }}</span>
+            </div>
+            <div class="flex gap-2 justify-center">
+              <p class="text-black font-bold w-fit inline">Link:</p>
+              <a
+                class="hover:text-emerald-300 hover:underline hover:font-bold duration-150"
+                target="_blank"
+                :href="repo.html_url"
+                >{{ repo.html_url }}</a
+              >
+            </div>
+            <div class="flex gap-2 justify-center flex-wrap">
+              <p class="text-black font-bold w-fit inline">Description:</p>
+              <span class="text-center">{{ repo.description }}</span>
+            </div>
           </div>
         </main>
+				<!-- Content -->
       </div>
     </div>
     <script>
-      const { createApp, reactive } = Vue;
+      const { createApp, reactive, ref } = Vue;
 
       createApp({
         setup() {
+          const message = ref('No repositories. Click "get all repos" or "get repo" to load data.');
           const repos = reactive([]);
+          const searchInput = ref('');
 
           const fetchAllRepos = async () => {
             try {
               const response = await fetch('http://localhost:8080/api/repo');
               if (!response.ok) {
-                alert('Failed to fetch repositories');
+                message.value = 'Failed to fetch repositories';
               }
               const data = await response.json();
               console.log(data);
               repos.splice(0, repos.length, ...data);
             } catch (error) {
-              alert('Error fetching repositories:', error);
+              message.value = `Error fetching repository: ${error}`;
+            }
+          };
+
+          const fetchRepo = async () => {
+            try {
+              const response = await fetch(`http://localhost:8080/api/repo/${searchInput.value}`);
+              if (!searchInput.value.trim()) {
+                repos.splice(0, repos.length);
+                message.value = 'Please enter a valid ID or name';
+                return;
+              }
+
+              if (response.status === 404) {
+                repos.splice(0, repos.length);
+                message.value = 'Repository not found. Please check the ID or name.';
+                return;
+              }
+
+              if (!response.ok) {
+                repos.splice(0, repos.length);
+                message.value = 'Repository not found or failed to fetch.';
+              }
+
+              const data = await response.json();
+              console.log(data);
+
+              repos.splice(0, repos.length, data);
+            } catch (error) {
+              repos.splice(0, repos.length);
+              message.value = `Error fetching repository: ${error}`;
+            } finally {
+              searchInput.value = '';
+            }
+          };
+
+          const resetRepos = async () => {
+            try {
+              const response = await fetch('http://localhost:8080/api/reset', {
+                method: 'POST',
+              });
+
+              if (!response.ok) {
+                message.value = 'Failed to reset repositories';
+              }
+
+              message.value = 'Repositories have been successfully reset!';
+            } catch (error) {
+              message.value = `Error resetting repositories: ${error}`;
+            } finally {
+              repos.splice(0, repos.length);
             }
           };
           return {
+            message,
             repos,
+            searchInput,
             fetchAllRepos,
+            fetchRepo,
+            resetRepos,
           };
         },
       }).mount('#app');
