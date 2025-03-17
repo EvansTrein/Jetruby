@@ -1,3 +1,10 @@
+/*
+commands:
+  npx ts-node ./cli.ts get-repo {id or name}
+  npx ts-node ./cli.ts get-all-repos
+  npx ts-node ./cli.ts reset-timer
+*/
+
 import { Command } from 'commander';
 import axios, { AxiosError } from 'axios';
 
